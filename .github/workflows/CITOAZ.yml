@@ -16,7 +16,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0.x
+        dotnet-version: 6.0.x
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
@@ -27,8 +27,8 @@ jobs:
     - uses: azure/docker-login@v1
       with:
         login-server: pritechrepository.azurecr.io
-        username: ${{ secrets.REGISTRY_pritechrepository }}
-        password: ${{ secrets.REGISTRY_WoLqSl/Yg5TCn=t1c6bqW7FKP8EaRGpB }}
+        username: ${{ secrets.REGISTRY_pritechrepository}}
+        password: ${{ secrets.REGISTRY_WoLqSl/Yg5TCn=t1c6bqW7FKP8EaRGpB}}
 
     - run: |
         docker build . -t pritechrepository.azurecr.io/k8sdemo:${{ github.sha }}
