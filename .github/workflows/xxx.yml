@@ -26,8 +26,8 @@ jobs:
     - uses: azure/docker-login@v1
       with:
         login-server: pritechrepository.azurecr.io
-        username: ${{ secrets.REGISTRY_pritechrepository}}
-        password: ${{ secrets.REGISTRY_WoLqSl/Yg5TCn=t1c6bqW7FKP8EaRGpB}}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
 
     - run: |
         docker build . -t pritechrepository.azurecr.io/k8sdemo:${{ github.sha }}
