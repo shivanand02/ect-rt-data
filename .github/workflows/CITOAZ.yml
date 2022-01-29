@@ -1,0 +1,35 @@
+name: .NET
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+
+    - uses: azure/docker-login@v1
+      with:
+        login-server: pritechrepository.azurecr.io
+        username: ${{ secrets.REGISTRY_pritechrepository }}
+        password: ${{ secrets.REGISTRY_WoLqSl/Yg5TCn=t1c6bqW7FKP8EaRGpB }}
+
+    - run: |
+        docker build . -t pritechrepository.azurecr.io/k8sdemo:${{ github.sha }}
+        docker push pritechrepository.azurecr.io/k8sdemo:${{ github.sha }}
