@@ -1,0 +1,39 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+    - name: Azure Container Registry Login
+      uses: Azure/docker-login@v1
+      with:
+        login-server: pritechrepository.azurecr.io
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+
+    - run: |
+        docker build . -t pritechrepository.azurecr.io/k8sdemo:${{ github.sha }}
+        
+        
+    - name: Scan image
+      uses: Azure/container-scan@v0
+      id: container-scan
+      with:
+        image-name: pritechrepository.azurecr.io/k8sdemo:${{ github.sha }}
+        severity-threshold: CRITICAL
+        run-quality-checks: true   
+    - name: push docker-image - pritechrepository.azurecr.io/k8sdemo:${{ github.sha }}
+    - run: |
+        docker push pritechrepository.azurecr.io/k8sdemo:${{ github.sha }}
