@@ -1,4 +1,4 @@
-name: .NET
+name: Docker Image CI
 
 on:
   push:
@@ -7,29 +7,33 @@ on:
     branches: [ main ]
 
 jobs:
+
   build:
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 6.0.x
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
-
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      
     - uses: azure/docker-login@v1
       with:
         login-server: pritechrepository.azurecr.io
-        username: ${{ secrets.REGISTRY_pritechrepository}}
-        password: ${{ secrets.REGISTRY_WoLqSl/Yg5TCn=t1c6bqW7FKP8EaRGpB}}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
 
     - run: |
         docker build . -t pritechrepository.azurecr.io/k8sdemo:${{ github.sha }}
+        
+        
+    - name: Scan image
+      uses: Azure/container-scan@v0
+      id: container-scan
+      with:
+        image-name: pritechrepository.azurecr.io/k8sdemo:${{ github.sha }}
+        severity-threshold: CRITICAL
+        run-quality-checks: true   
+    - name: push docker-image - pritechrepository.azurecr.io/k8sdemo:${{ github.sha }}
+    - run: |
         docker push pritechrepository.azurecr.io/k8sdemo:${{ github.sha }}
