@@ -31,7 +31,6 @@ jobs:
         username: pritechrepository
         password: WoLqSl/Yg5TCn=t1c6bqW7FKP8EaRGpB
     - run: |
-       echo "github.sha=$GITHUB_SHA"
        docker build -t pritechrepository.azurecr.io/k8sdemo:${{ github.sha }}
         
     - uses: Azure/container-scan@v0 
