@@ -23,13 +23,13 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
-    
+      
     - name: Azure Container Registry Login
-      uses: Azure/docker-login@v1
+      uses: azure/docker-login@v1
       with:
         login-server: pritechrepository.azurecr.io
-        username: ${{ secrets.ACR_USERNAME }}
-        password: ${{ secrets.ACR_PASSWORD }}
+        username: pritechrepository
+        password: WoLqSl/Yg5TCn=t1c6bqW7FKP8EaRGpB
     - run: |
        echo "github.sha=$GITHUB_SHA"
        docker build -t pritechrepository.azurecr.io/k8sdemo:${{ github.sha }}
