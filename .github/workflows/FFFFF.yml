@@ -1,0 +1,52 @@
+name: .NET
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+    
+    - name: Azure Container Registry Login
+      uses: Azure/docker-login@v1
+      with:
+        login-server: pritechrepository.azurecr.io
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+    - run: |
+       echo "github.sha=$GITHUB_SHA"
+       docker build -t pritechrepository.azurecr.io/k8sdemo:${{ github.sha }}
+        
+    - uses: Azure/container-scan@v0 
+      name: Scan image for vulnerabilities
+      id: container-scan
+      continue-on-error: true 
+      with:
+        image-name: pritechrepository.azurecr.io/k8sdemo:${{ github.sha }} 
+        
+    - name: Push Docker image - pritechrepository.azurecr.io/k8sdemo:${{ github.sha }}
+      run: |
+       docker push pritechrepository.azurecr.io/k8sdemo:${{ github.sha }}
+    - name: Post logs to appinsights
+      uses: Azure/publish-security-assessments@v0
+      with:
+        scan-results-path: ${{ steps.container-scan.outputs.scan-report-path }}
+        connection-string: ${{ secrets.AZ_APPINSIGHTS_CONNECTION_STRING }}
+        subscription-token: ${{ secrets.AZ_SUBSCRIPTION_TOKEN }} 
